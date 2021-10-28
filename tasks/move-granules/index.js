@@ -25,6 +25,7 @@ const {
 
 const {
   isCMRFile,
+  isISOFileObject,
   metadataObjectFromCMRFile,
   granulesToCmrFileObjects,
 } = require('@cumulus/cmrjs');
@@ -254,7 +255,7 @@ async function moveGranules(event) {
   const duplicateHandling = duplicateHandlingType(event);
 
   const granulesInput = event.input.granules;
-  const cmrFiles = granulesToCmrFileObjects(granulesInput);
+  const cmrFiles = granulesToCmrFileObjects(granulesInput, (fileobject) => isCMRFile(fileobject) || isISOFile(fileobject));
   const granulesByGranuleId = keyBy(granulesInput, 'granuleId');
 
   let movedGranulesByGranuleId;

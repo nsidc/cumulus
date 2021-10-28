@@ -9,8 +9,8 @@ const { granulesToCmrFileObjects } = require('@cumulus/cmrjs');
 const {
   generateEcho10XMLString,
   isCMRFile,
-  isECHO10File,
-  isUMMGFile,
+  isECHO10Filename,
+  isUMMGFilename,
   metadataObjectFromCMRFile,
   uploadEcho10CMRFile,
   uploadUMMGJSONCMRFile,
@@ -174,7 +174,7 @@ async function updateCmrFileAccessConstraint(
   );
   const { Bucket, Key } = parseS3Uri(cmrFileName);
   // ECHO10XML logic
-  if (isECHO10File(cmrFileName)) {
+  if (isECHO10Filename(cmrFileName)) {
     const updatedCmrMetadataContentsObject = setRestrictionMetadataInEcho10XMLMetadata(
       cmrMetadataContentsObject,
       accessConstraintsObject
@@ -187,7 +187,7 @@ async function updateCmrFileAccessConstraint(
     return { ...cmrFileObject, etag: updatedCmrFile.ETag };
   }
   // UMMG-JSON logic
-  if (isUMMGFile(cmrFileName)) {
+  if (isUMMGFilename(cmrFileName)) {
     const updatedCmrMetadataContentsObject = setAccessConstraintMetadataInUMMGJSONMetadata(
       cmrMetadataContentsObject,
       accessConstraintsObject

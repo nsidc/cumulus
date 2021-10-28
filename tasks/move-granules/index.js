@@ -25,7 +25,7 @@ const {
 
 const {
   isCMRFile,
-  isISOFileObject,
+  isISOFile,
   metadataObjectFromCMRFile,
   granulesToCmrFileObjects,
 } = require('@cumulus/cmrjs');

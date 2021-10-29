@@ -107,7 +107,7 @@ function isISOFile(fileobject) {
  * @returns {Array<Object>} an array of CMR file objects, each with properties
  *    `granuleId`, `filename`, and possibly `etag` (if present on input)
  */
-function granuleToCmrFileObject({ granuleId, files = []}, filterFunc = isCMRFile) {
+function granuleToCmrFileObject({ granuleId, files = [] }, filterFunc = isCMRFile) {
   return files
     .filter(filterFunc)
     .map((file) => ({

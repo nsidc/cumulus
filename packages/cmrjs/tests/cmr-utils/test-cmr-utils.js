@@ -242,7 +242,7 @@ test('granuleToCmrFileObject returns correct objects for files with a bucket/key
       key: 'fake.iso.xml',
     }],
   };
-  const filterFunc = (fileobject) => fileobject.key.endsWith('.iso.xml')
+  const filterFunc = (fileobject) => fileobject.key.endsWith('.iso.xml');
   t.deepEqual(
     granuleToCmrFileObject(granule, filterFunc),
     [{

@@ -255,7 +255,9 @@ async function moveGranules(event) {
   const duplicateHandling = duplicateHandlingType(event);
 
   const granulesInput = event.input.granules;
-  const cmrFiles = granulesToCmrFileObjects(granulesInput, (fileobject) => isCMRFile(fileobject) || isISOFile(fileobject));
+
+  const filterFunc = (fileobject) => isCMRFile(fileobject) || isISOFile(fileobject);
+  const cmrFiles = granulesToCmrFileObjects(granulesInput, filterFunc);
   const granulesByGranuleId = keyBy(granulesInput, 'granuleId');
 
   let movedGranulesByGranuleId;

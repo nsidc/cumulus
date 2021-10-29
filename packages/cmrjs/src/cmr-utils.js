@@ -308,7 +308,7 @@ const metadataObjectFromCMRXMLFile = (cmrFilename, etag) =>
  * @see isUMMGFilename
  */
 function metadataObjectFromCMRFile(cmrFilename, etag) {
-  if (isECHO10Filename(cmrFilename)) {
+  if (isECHO10Filename(cmrFilename) || isISOFilename(cmrFilename)) {
     return metadataObjectFromCMRXMLFile(cmrFilename, etag);
   }
   if (isUMMGFilename(cmrFilename)) {

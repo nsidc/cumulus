@@ -19,8 +19,8 @@ const {
 } = require('@cumulus/cmr-client');
 
 const {
-  isECHO10File,
-  isUMMGFile,
+  isECHO10Filename,
+  isUMMGFilename,
   isCMRFile,
   generateEcho10XMLString,
   getCmrSettings,
@@ -274,10 +274,10 @@ async function getMetadataObject(metadataFileName, metadata) {
   let isUmmG = false;
   // Parse into DOM based on file extension
   let metadataObject;
-  if (isUMMGFile(metadataFileName)) {
+  if (isUMMGFilename(metadataFileName)) {
     metadataObject = JSON.parse(metadata);
     isUmmG = true;
-  } else if (isECHO10File(metadataFileName)) {
+  } else if (isECHO10Filename(metadataFileName)) {
     metadataObject = await (promisify(xml2js.parseString))(metadata, xmlParseOptions);
   } else {
     throw new InvalidArgument(`Metadata file ${metadataFileName} is in unknown format`);

@@ -4,29 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## v9.9.0-nsidc
+## v9.9.0-nsidc2
 
-### BREAKING CHANGES
+### Fixed
 
-- **NDCUM-624**:
-  - Functions in @cumulus/cmrjs renamed for consistency with `isCMRFilename` and `isCMRFile`
-    - `isECHO10File` -> `isECHO10Filename`
-    - `isUMMGFile` -> `isUMMGFilename`
-    - `isISOFile` -> `isCMRISOFilename`
+- **NDCUM-701**
+  - cherry-pick the changes from PR #2549 for NDCUM-624:
+    - Breakinng Change: Functions in @cumulus/cmrjs renamed for consistency with `isCMRFilename` and `isCMRFile`
+      - `isECHO10File` -> `isECHO10Filename`
+      - `isUMMGFile` -> `isUMMGFilename`
+      - `isISOFile` -> `isCMRISOFilename`
+    - Added: support for ISO metadata files for the `MoveGranules` step
+      - Add function `isISOFile` to check if a given file object is an ISO file
+      - `granuleToCmrFileObject` and `granulesToCmrFileObjects` now take a
+        `filterFunc` argument
+        - `filterFunc`'s default value is `isCMRFile`, so the previous behavior is
+          maintained if no value is given for this argument
+        - `MoveGranules` passes a custom filter function to
+          `granulesToCmrFileObjects` to check for `isISOFile` in addition to
+          `isCMRFile`, so that metadata from `.iso.xml` files can be used in the
+          `urlPathTemplate`
 
-### Added
+## v9.9.0-nsidc1
 
-- **NDCUM-624**: Add support for ISO metadata files for the `MoveGranules` step
-  - Add function `isISOFile` to check if a given file object is an ISO file
-  - `granuleToCmrFileObject` and `granulesToCmrFileObjects` now take a
-    `filterFunc` argument
-    - `filterFunc`'s default value is `isCMRFile`, so the previous behavior is
-      maintained if no value is given for this argument
-    - `MoveGranules` passes a custom filter function to
-      `granulesToCmrFileObjects` to check for `isISOFile` in addition to
-      `isCMRFile`, so that metadata from `.iso.xml` files can be used in the
-      `urlPathTemplate`
+### Fixed
 
+- **NDCUM-701**/**CUMULUS-2835**
+  - Updated `hyrax-metadata-updates` task to support reading the DatasetId from ECHO10 XML, and the EntryTitle from UMM-G JSON; these are both valid alternatives to the shortname and version ID.
 
 ## [v9.9.0] 2021-11-03
 

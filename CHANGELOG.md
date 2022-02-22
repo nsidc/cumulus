@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## v9.9.3-nsidc1
+
+* Merge `v9.9.3` into the `v9.9.x-nsidc` branch, to combine changes from
+  `v9.9.0-nsidc2`,
+  [`v9.9.1`]((https://github.com/nasa/cumulus/releases/tag/v9.9.1)),
+  [`v9.9.2`]((https://github.com/nasa/cumulus/releases/tag/v9.9.2)), and
+  [`v9.9.3`](https://github.com/nasa/cumulus/releases/tag/v9.9.3)
+
 ## v9.9.0-nsidc2
 
 ### Fixed

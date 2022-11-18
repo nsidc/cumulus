@@ -55,4 +55,6 @@ module "ingest" {
   sf_event_sqs_to_db_records_sqs_queue_url = module.archive.sf_event_sqs_to_db_records_sqs_queue_url
 
   tags = var.tags
+
+  cloudwatch_log_retention_in_days = var.cloudwatch_log_retention_in_days
 }

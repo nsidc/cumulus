@@ -20,6 +20,7 @@ const {
   waitForCompletedExecution,
 } = require('@cumulus/integration-tests');
 const { LambdaStep } = require('@cumulus/integration-tests/sfnStep');
+const { constructCollectionId } = require('@cumulus/message/Collections');
 
 const { removeCollectionAndAllDependencies } = require('../../helpers/Collections');
 const { buildAndStartWorkflow } = require('../../helpers/workflowUtils');
@@ -72,8 +73,6 @@ describe('The S3 Ingest Granules workflow', () => {
 
     collection = { name: `MOD09GQ${testSuffix}`, version: '006' };
     provider = { id: `s3_provider${testSuffix}` };
-
-    process.env.GranulesTable = `${config.stackName}-GranulesTable`;
 
     // populate collections, providers and test data
     await Promise.all([
@@ -165,7 +164,10 @@ describe('The S3 Ingest Granules workflow', () => {
 
       const response = await bulkOperation({
         prefix: config.stackName,
-        ids: [granuleId],
+        granules: [{
+          granuleId,
+          collectionId: constructCollectionId(collection.name, collection.version),
+        }],
         workflowName: recoveryWorkflowName,
       });
 

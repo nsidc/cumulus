@@ -538,7 +538,7 @@ function constructOnlineAccessUrls({
     return [distribution, s3];
   }, [[],[]]);
 
-  const urlList distributionUrls.concat(s3Urls);
+  const urlList = distributionUrls.concat(s3Urls);
   return urlList.filter((urlObj) => urlObj);
 }
 

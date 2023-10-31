@@ -1,7 +1,6 @@
 'use strict';
 
 const got = require('got');
-const flatten = require('lodash/flatten');
 const get = require('lodash/get');
 const pick = require('lodash/pick');
 const set = require('lodash/set');
@@ -16,6 +15,7 @@ const {
   parseS3Uri,
   promiseS3Upload,
   s3GetObjectTagging,
+  s3ObjectExists,
   s3TagSetToQueryString,
   waitForObject,
   getObjectStreamContents,
@@ -487,7 +487,7 @@ function constructOnlineAccessUrl({
 }
 
 /**
- * Construct a list of online access urls.
+ * Construct a list of online access urls grouped by link type.
  *
  * @param {Object} params - input parameters
  * @param {Array<Object>} params.files - array of file objects
@@ -498,7 +498,7 @@ function constructOnlineAccessUrl({
  *                                                               for all distribution bucketss
  * @param {boolean} params.useDirectS3Type - indicate if direct s3 access type is used
  * @returns {Promise<[{URL: string, URLDescription: string}]>} an array of
- *    online access url objects
+ *    online access url objects grouped by link type.
  */
 function constructOnlineAccessUrls({
   files,
@@ -512,8 +512,7 @@ function constructOnlineAccessUrls({
     throw new Error(`cmrGranuleUrlType is ${cmrGranuleUrlType}, but no distribution endpoint is configured.`);
   }
 
-  const urlListCalls = files.map((file) => {
-    const urls = [];
+  const [distributionUrls, s3Urls] = files.reduce(([distributionAcc, s3Acc], file) => {
     if (['both', 'distribution'].includes(cmrGranuleUrlType)) {
       const url = constructOnlineAccessUrl({
         file,
@@ -523,7 +522,7 @@ function constructOnlineAccessUrls({
         distributionBucketMap,
         useDirectS3Type,
       });
-      urls.push(url);
+      distributionAcc.push(url);
     }
     if (['both', 's3'].includes(cmrGranuleUrlType)) {
       const url = constructOnlineAccessUrl({
@@ -534,11 +533,11 @@ function constructOnlineAccessUrls({
         distributionBucketMap,
         useDirectS3Type,
       });
-      urls.push(url);
+      s3Acc.push(url);
     }
-    return urls;
-  });
-  const urlList = flatten(urlListCalls);
+    return [distributionAcc, s3Acc];
+  }, [[], []]);
+  const urlList = distributionUrls.concat(s3Urls);
   return urlList.filter((urlObj) => urlObj);
 }
 
@@ -1099,6 +1098,11 @@ async function getGranuleTemporalInfo(granule) {
   if (cmrFile === undefined || cmrFile.length === 0) return {};
 
   const cmrFilename = getS3UrlOfFile(cmrFile[0]);
+
+  if (!(await s3ObjectExists(parseS3Uri(cmrFilename)))) {
+    log.warn(`getGranuleTemporalInfo cmr file does not exist ${cmrFilename}`);
+    return {};
+  }
 
   if (isCMRISOFilename(cmrFilename)) {
     const metadata = await metadataObjectFromCMRXMLFile(cmrFilename);

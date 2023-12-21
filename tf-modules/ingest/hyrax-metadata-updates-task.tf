@@ -31,12 +31,12 @@ resource "aws_lambda_function" "hyrax_metadata_updates_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 resource "aws_cloudwatch_log_group" "hyrax_metadata_updates_task" {
   name              = "/aws/lambda/${var.prefix}-HyraxMetadataUpdates"
   retention_in_days = lookup(var.cloudwatch_log_retention_periods, "HyraxMetadataUpdates", var.default_log_retention_days)
-  tags              = var.tags
+  tags              = local.task_tags
 }
 

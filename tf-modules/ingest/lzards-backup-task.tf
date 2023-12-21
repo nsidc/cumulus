@@ -36,7 +36,7 @@ resource "aws_lambda_function" "lzards_backup_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 # Lambda backup role
@@ -65,7 +65,7 @@ resource "aws_iam_role" "lambda_backup_role" {
   name                 = "${var.prefix}-lambda-backups"
   assume_role_policy   = data.aws_iam_policy_document.lambda_backup_role_policy[0].json
   permissions_boundary = var.permissions_boundary_arn
-  tags                 = var.tags
+  tags                 = local.task_tags
 }
 
 data "aws_iam_policy_document" "lambda_backup_policy" {
@@ -93,7 +93,7 @@ resource "aws_secretsmanager_secret" "lzards_launchpad_passphrase" {
   count       = length(var.lzards_launchpad_passphrase) == 0 ? 0 : 1
   name_prefix = "${var.prefix}-lzards-launchpad-passphrase"
   description = "Launchpad passphrase for the lzards-backup task from the ${var.prefix} deployment"
-  tags        = var.tags
+  tags        = local.task_tags
 }
 
 resource "aws_secretsmanager_secret_version" "lzards_launchpad_passphrase" {

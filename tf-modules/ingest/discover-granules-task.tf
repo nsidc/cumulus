@@ -28,5 +28,5 @@ resource "aws_lambda_function" "discover_granules_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

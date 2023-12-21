@@ -27,5 +27,5 @@ resource "aws_lambda_function" "pdr_status_check_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

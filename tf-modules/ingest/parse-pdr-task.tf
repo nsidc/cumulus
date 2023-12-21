@@ -28,11 +28,11 @@ resource "aws_lambda_function" "parse_pdr_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 resource "aws_cloudwatch_log_group" "parse_pdr_task" {
   name              = "/aws/lambda/${var.prefix}-ParsePdr"
   retention_in_days = lookup(var.cloudwatch_log_retention_periods, "ParsePdr", var.default_log_retention_days)
-  tags              = var.tags
+  tags              = local.task_tags
 }

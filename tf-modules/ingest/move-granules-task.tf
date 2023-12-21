@@ -31,5 +31,5 @@ resource "aws_lambda_function" "move_granules_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

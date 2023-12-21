@@ -28,7 +28,7 @@ module "distribution" {
   vpc_id                                         = var.vpc_id
   deploy_to_ngap                                 = var.deploy_to_ngap
 
-  tags = var.tags
+  tags = merge(var.tags, local.distribution_module_tag)
 
   default_log_retention_days = var.default_log_retention_days
   cloudwatch_log_retention_periods = var.cloudwatch_log_retention_periods

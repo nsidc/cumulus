@@ -27,5 +27,5 @@ resource "aws_lambda_function" "send_pan_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

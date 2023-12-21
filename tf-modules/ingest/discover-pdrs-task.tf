@@ -28,11 +28,11 @@ resource "aws_lambda_function" "discover_pdrs_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 resource "aws_cloudwatch_log_group" "discover_pdrs_task" {
   name              = "/aws/lambda/${var.prefix}-DiscoverPdrs"
   retention_in_days = lookup(var.cloudwatch_log_retention_periods, "DiscoverPdrs", var.default_log_retention_days)
-  tags              = var.tags
+  tags              = local.task_tags
 }

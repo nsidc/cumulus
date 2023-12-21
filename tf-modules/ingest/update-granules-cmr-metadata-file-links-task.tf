@@ -30,5 +30,5 @@ resource "aws_lambda_function" "update_granules_cmr_metadata_file_links_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

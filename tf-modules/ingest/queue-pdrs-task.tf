@@ -28,11 +28,11 @@ resource "aws_lambda_function" "queue_pdrs_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 resource "aws_cloudwatch_log_group" "queue_pdrs_task" {
   name              = "/aws/lambda/${var.prefix}-QueuePdrs"
   retention_in_days = lookup(var.cloudwatch_log_retention_periods, "QueuePdrs", var.default_log_retention_days)
-  tags              = var.tags
+  tags              = local.task_tags
 }

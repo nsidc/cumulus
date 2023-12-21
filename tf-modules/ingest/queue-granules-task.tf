@@ -27,5 +27,5 @@ resource "aws_lambda_function" "queue_granules_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

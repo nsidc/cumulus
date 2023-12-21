@@ -28,11 +28,11 @@ resource "aws_lambda_function" "queue_workflow_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }
 
 resource "aws_cloudwatch_log_group" "queue_workflow_task" {
   name              = "/aws/lambda/${var.prefix}-QueueWorkflow"
   retention_in_days = lookup(var.cloudwatch_log_retention_periods, "QueueWorkflow", var.default_log_retention_days)
-  tags              = var.tags
+  tags              = local.task_tags
 }

@@ -27,5 +27,5 @@ resource "aws_lambda_function" "fake_processing_task" {
     }
   }
 
-  tags = var.tags
+  tags = local.task_tags
 }

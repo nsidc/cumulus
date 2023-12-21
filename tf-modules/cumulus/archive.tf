@@ -109,7 +109,7 @@ module "archive" {
   rds_user_access_secret_arn = var.rds_user_access_secret_arn
   rds_connection_timing_configuration    = var.rds_connection_timing_configuration
 
-  tags = var.tags
+  tags = merge(var.tags, local.archive_module_tag)
 
   report_sns_topic_subscriber_arns = var.report_sns_topic_subscriber_arns
 }

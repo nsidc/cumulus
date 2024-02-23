@@ -37,7 +37,7 @@ const {
 } = require('../../helpers/testUtils');
 
 async function getNumberOfTopicSubscriptions(snsTopicArn) {
-  const subs = await sns().listSubscriptionsByTopic({ TopicArn: snsTopicArn }).promise();
+  const subs = await sns().listSubscriptionsByTopic({ TopicArn: snsTopicArn });
   return subs.Subscriptions.length;
 }
 
@@ -45,7 +45,7 @@ const policyErrorMessage = 'The resource you requested does not exist.';
 
 async function shouldCatchPolicyError(consumerName, expectedStatementId) {
   try {
-    const policy = await lambda().getPolicy({ FunctionName: consumerName }).promise();
+    const policy = await lambda().getPolicy({ FunctionName: consumerName });
     const statement = JSON.parse(policy.Policy).Statement;
     if (!statement.some((s) => s.Sid === expectedStatementId)) return policyErrorMessage;
     return undefined;
@@ -108,7 +108,7 @@ describe('The SNS-type rule', () => {
 
       await addCollections(config.stackName, config.bucket, collectionsDir,
         testSuffix, testId);
-      const { TopicArn } = await SNS.createTopic({ Name: snsTopicName }).promise();
+      const { TopicArn } = await SNS.createTopic({ Name: snsTopicName });
       snsTopicArn = TopicArn;
       snsRuleDefinition.rule.value = TopicArn;
       const postRuleResponse = await postRule({
@@ -124,14 +124,14 @@ describe('The SNS-type rule', () => {
   });
 
   afterAll(async () => {
-    await SNS.deleteTopic({ TopicArn: snsTopicArn }).promise();
+    await SNS.deleteTopic({ TopicArn: snsTopicArn });
 
     try {
       const permissionParams = {
         FunctionName: consumerName,
         StatementId: expectedStatementId,
       };
-      await lambda().removePermission(permissionParams).promise();
+      await lambda().removePermission(permissionParams);
     } catch (error) {
       // If the deletion test passed, this _should_ fail.  This is just handling
       // the case where the deletion test did not properly clean this up.
@@ -182,7 +182,7 @@ describe('The SNS-type rule', () => {
       if (beforeAllFailed) fail(beforeAllFailed);
       const response = await lambda().getPolicy({
         FunctionName: consumerName,
-      }).promise();
+      });
       const { Policy } = response;
 
       const statementSids = JSON.parse(Policy).Statement.map((s) => s.Sid);
@@ -197,7 +197,7 @@ describe('The SNS-type rule', () => {
       try {
         const messagePublishTime = Date.now() - 1000 * 30;
 
-        await SNS.publish({ Message: snsMessage, TopicArn: snsTopicArn }).promise();
+        await SNS.publish({ TopicArn: snsTopicArn, Message: snsMessage });
 
         console.log('originalPayload.testId', testId);
         helloWorldExecutionArn = await findExecutionArn(
@@ -298,7 +298,7 @@ describe('The SNS-type rule', () => {
     beforeAll(async () => {
       if (beforeAllFailed) return;
       try {
-        const { TopicArn } = await SNS.createTopic({ Name: newValueTopicName }).promise();
+        const { TopicArn } = await SNS.createTopic({ Name: newValueTopicName });
         newTopicArn = TopicArn;
         const updateParams = {
           rule: {
@@ -326,7 +326,7 @@ describe('The SNS-type rule', () => {
           state: 'DISABLED',
         },
       });
-      await SNS.deleteTopic({ TopicArn: newTopicArn }).promise();
+      await SNS.deleteTopic({ TopicArn: newTopicArn });
     });
 
     it('saves the new rule.value', () => {
@@ -342,7 +342,7 @@ describe('The SNS-type rule', () => {
 
     it('adds the new policy and subscription', async () => {
       if (beforeAllFailed) fail(beforeAllFailed);
-      const { Policy } = await lambda().getPolicy({ FunctionName: consumerName }).promise();
+      const { Policy } = await lambda().getPolicy({ FunctionName: consumerName });
       const { Statement } = JSON.parse(Policy);
       expect(await getNumberOfTopicSubscriptions(newTopicArn)).toBeGreaterThan(0);
       expect(Statement.some((s) => s.Sid === getSnsTriggerPermissionId(putRule))).toBeTrue();
@@ -356,15 +356,15 @@ describe('The SNS-type rule', () => {
     beforeAll(async () => {
       if (beforeAllFailed) return;
       try {
-        const { TopicArn } = await SNS.createTopic({ Name: newValueTopicName }).promise();
+        const { TopicArn } = await SNS.createTopic({ Name: newValueTopicName });
         newTopicArn = TopicArn;
         const subscriptionParams = {
           TopicArn,
           Protocol: 'lambda',
-          Endpoint: (await lambda().getFunction({ FunctionName: consumerName }).promise()).Configuration.FunctionArn,
+          Endpoint: (await lambda().getFunction({ FunctionName: consumerName })).Configuration.FunctionArn,
           ReturnSubscriptionArn: true,
         };
-        const { SubscriptionArn } = await SNS.subscribe(subscriptionParams).promise();
+        const { SubscriptionArn } = await SNS.subscribe(subscriptionParams);
         subscriptionArn = SubscriptionArn;
         const updateParams = {
           ...createdRule.record,
@@ -414,7 +414,7 @@ describe('The SNS-type rule', () => {
     });
 
     afterAll(async () => {
-      await SNS.deleteTopic({ TopicArn: newTopicArn }).promise();
+      await SNS.deleteTopic({ TopicArn: newTopicArn });
     });
 
     it('is removed from the rules API', () => {

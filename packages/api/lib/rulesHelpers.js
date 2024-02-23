@@ -4,7 +4,7 @@
 
 const cloneDeep = require('lodash/cloneDeep');
 const get = require('lodash/get');
-const isNull = require('lodash/isNull');
+const isNil = require('lodash/isNil');
 const set = require('lodash/set');
 
 const awsServices = require('@cumulus/aws-client/services');
@@ -135,7 +135,7 @@ async function buildPayload(rule) {
   const exists = await s3Utils.fileExists(bucket, workflowFileKey);
   if (!exists) throw new Error(`Workflow doesn\'t exist: s3://${bucket}/${workflowFileKey} for ${rule.name}`);
 
-  const definition = await s3Utils.getJsonS3Object(
+  const fullDefinition = await s3Utils.getJsonS3Object(
     bucket,
     workflowFileKey
   );
@@ -143,7 +143,10 @@ async function buildPayload(rule) {
 
   return {
     template,
-    definition,
+    definition: {
+      name: fullDefinition.name,
+      arn: fullDefinition.arn,
+    },
     provider: rule.provider,
     collection: rule.collection,
     meta: get(rule, 'meta', {}),
@@ -215,7 +218,7 @@ async function deleteKinesisEventSource(knex, rule, eventType, id) {
       UUID: id[eventType],
     };
     log.info(`Deleting event source with UUID ${id[eventType]}`);
-    return awsServices.lambda().deleteEventSourceMapping(params).promise();
+    return awsServices.lambda().deleteEventSourceMapping(params);
   }
   log.info(`Event source mapping is shared with another rule. Will not delete kinesis event source for ${rule.name}`);
   return undefined;
@@ -255,7 +258,7 @@ async function deleteKinesisEventSources(knex, rule, testContext = {
     (lambda) => deleteKinesisEventSourceMethod(knex, rule, lambda.eventType, lambda.type).catch(
       (error) => {
         log.error(`Error deleting eventSourceMapping for ${rule.name}: ${error}`);
-        if (error.code !== 'ResourceNotFoundException') throw error;
+        if (error.name !== 'ResourceNotFoundException') throw error;
       }
     )
   );
@@ -280,7 +283,7 @@ async function deleteSnsTrigger(knex, rule) {
     StatementId: getSnsTriggerPermissionId(rule),
   };
   try {
-    await awsServices.lambda().removePermission(permissionParams).promise();
+    await awsServices.lambda().removePermission(permissionParams);
   } catch (error) {
     if (isResourceNotFoundException(error)) {
       throw new ResourceNotFoundError(error);
@@ -293,7 +296,7 @@ async function deleteSnsTrigger(knex, rule) {
     SubscriptionArn: rule.rule.arn,
   };
   log.info(`Successfully deleted SNS subscription for ARN ${rule.rule.arn}.`);
-  return awsServices.sns().unsubscribe(subscriptionParams).promise();
+  return awsServices.sns().unsubscribe(subscriptionParams);
 }
 
 /**
@@ -360,17 +363,18 @@ async function validateAndUpdateSqsRule(rule) {
     QueueUrl: queueUrl,
     AttributeNames: ['All'],
   };
-  const attributes = await awsServices.sqs().getQueueAttributes(qAttrParams).promise();
+  const attributes = await awsServices.sqs().getQueueAttributes(qAttrParams);
   if (!attributes.Attributes.RedrivePolicy) {
     throw new Error(`SQS queue ${queueUrl} does not have a dead-letter queue configured`);
   }
 
   // update rule meta
-  if (!get(rule, 'meta.visibilityTimeout')) {
+  if (isNil(get(rule, 'meta.visibilityTimeout'))) {
     set(rule, 'meta.visibilityTimeout', Number.parseInt(attributes.Attributes.VisibilityTimeout, 10));
   }
 
-  if (!get(rule, 'meta.retries')) set(rule, 'meta.retries', 3);
+  if (isNil(get(rule, 'meta.retries'))) set(rule, 'meta.retries', 3);
+
   return rule;
 }
 
@@ -387,7 +391,7 @@ async function addKinesisEventSource(item, lambda) {
     FunctionName: lambda.name,
     EventSourceArn: item.rule.value,
   };
-  const listData = await awsServices.lambda().listEventSourceMappings(listParams).promise();
+  const listData = await awsServices.lambda().listEventSourceMappings(listParams);
   if (listData.EventSourceMappings && listData.EventSourceMappings.length > 0) {
     const currentMapping = listData.EventSourceMappings[0];
 
@@ -398,7 +402,7 @@ async function addKinesisEventSource(item, lambda) {
     return awsServices.lambda().updateEventSourceMapping({
       UUID: currentMapping.UUID,
       Enabled: true,
-    }).promise();
+    });
   }
 
   // create event source mapping
@@ -408,7 +412,7 @@ async function addKinesisEventSource(item, lambda) {
     StartingPosition: 'TRIM_HORIZON',
     Enabled: true,
   };
-  return awsServices.lambda().createEventSourceMapping(params).promise();
+  return awsServices.lambda().createEventSourceMapping(params);
 }
 
 /**
@@ -430,7 +434,7 @@ async function addKinesisEventSources(rule) {
     (lambda) => addKinesisEventSource(rule, lambda).catch(
       (error) => {
         log.error(`Error adding eventSourceMapping for ${rule.name}: ${error}`);
-        if (error.code !== 'ResourceNotFoundException') throw error;
+        if (error.name !== 'ResourceNotFoundException') throw error;
       }
     )
   );
@@ -458,7 +462,7 @@ async function checkForSnsSubscriptions(ruleItem) {
     const subsResponse = await awsServices.sns().listSubscriptionsByTopic({
       TopicArn: ruleItem.rule.value,
       NextToken: token,
-    }).promise();
+    });
     token = subsResponse.NextToken;
     if (subsResponse.Subscriptions) {
       /* eslint-disable no-loop-func */
@@ -501,7 +505,7 @@ async function addSnsTrigger(item) {
       Endpoint: process.env.messageConsumer,
       ReturnSubscriptionArn: true,
     };
-    const r = await awsServices.sns().subscribe(subscriptionParams).promise();
+    const r = await awsServices.sns().subscribe(subscriptionParams);
     subscriptionArn = r.SubscriptionArn;
     // create permission to invoke lambda
     const permissionParams = {
@@ -511,7 +515,7 @@ async function addSnsTrigger(item) {
       SourceArn: item.rule.value,
       StatementId: getSnsTriggerPermissionId(item),
     };
-    await awsServices.lambda().addPermission(permissionParams).promise();
+    await awsServices.lambda().addPermission(permissionParams);
   }
   return subscriptionArn;
 }
@@ -586,7 +590,7 @@ function validateRecord(rule) {
     throw error;
   }
 
-  recordIsValid(omitDeepBy(rule, isNull), ruleSchema, false);
+  recordIsValid(omitDeepBy(rule, isNil), ruleSchema, false);
 
   if (rule.rule.type !== 'onetime' && !rule.rule.value) {
     error.message += `Rule value is undefined for ${rule.rule.type} rule`;

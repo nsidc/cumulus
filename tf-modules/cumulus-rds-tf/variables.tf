@@ -106,7 +106,7 @@ variable "parameter_group_family_v13" {
 variable "enable_upgrade" {
   description = "Flag to enable use of updated parameter group for postgres v13"
   type = bool
-  default = true
+  default = false
 }
 
 variable "auto_pause" {

@@ -69,6 +69,13 @@ async function updateGranulesCmrMetadataFileLinks(event) {
   const cmrFiles = granulesToCmrFileObjects(granules);
   const granulesByGranuleId = keyBy(granules, 'granuleId');
 
+  const excludes = {
+    'extensions': {}
+    // This should be the `meta.extensionExcludes`, I believe, though it can be modified
+    // to use a regex if necessary.  I was trying to figure out how the `event.config`
+    // object is mapped out; is it the same as the `event.meta` in the input file?
+  };
+
   const distributionBucketMap = await fetchDistributionBucketMap();
   const updatedCmrFiles = await updateEachCmrFileAccessURLs(
     cmrFiles,
@@ -77,6 +84,8 @@ async function updateGranulesCmrMetadataFileLinks(event) {
     config.distribution_endpoint,
     bucketTypes,
     distributionBucketMap
+    // I think we may need to pass the `excludes` along the pipeline here so we have access to 
+    // the configuration.
   );
 
   // Map etag info from granules' CMR files

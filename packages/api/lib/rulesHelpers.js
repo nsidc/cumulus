@@ -80,7 +80,7 @@ async function fetchRules({ pageNumber = 1, pageSize = 100, rules = [], queryPar
 }
 
 async function fetchEnabledRules() {
-  return await fetchRules({ queryParams: { state: 'ENABLED' } });
+  return await fetchRules({ queryParams: { state: 'ENABLED', 'sort_key[]': 'timestamp'} });
 }
 
 const collectionRuleMatcher = (rule, collection, logger = log) => {
